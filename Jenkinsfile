@@ -1,39 +1,55 @@
 pipeline {
-    agent any
+
+    agent {
+        docker {
+            image "maven:3.8.6-jdk-11"
+        }
+    }
 
     stages {
-        stage('Validate') {
+
+        stage('Build'){
             steps {
-                sh 'mvn validate'
-                sh 'mvn clean'
+                sh "mvn clean"
+
+                sh "mvn compile"
             }
         }
-        stage('Build') {
+
+        stage('Test'){
             steps {
-                sh 'mvn compile'
+                
+                sh "mvn test"
+            }
+
+            post {
+                always {
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                }
             }
         }
-        stage('Test') {
+
+        stage('sonar scan'){
             steps {
-                sh 'mvn test'
+              sh "mvn clean verify sonar:sonar \
+  -Dsonar.projectKey=maven-java-project \
+  -Dsonar.host.url=http://ec2-3-91-243-131.compute-1.amazonaws.com \
+  -Dsonar.login=sqp_a4c121c39873e54ac4bae23a4164328057f3d261"
             }
         }
-        post{
-            always{
-                junit '**/target/surefire-reports/TEST-*.xml'
-            }
-        }
-        stage('Package') {
+
+        stage('Package'){
             steps {
-                sh 'mvn package'
+                
+                sh "mvn package"
             }
-        }
-        post{
-            success{
-                archiveArtifacts artifacts: '**/target/**.war', followSymlinks: false
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/target/*.war', followSymlinks: false
+                }
             }
         }
 
     }
-}
 
+}
