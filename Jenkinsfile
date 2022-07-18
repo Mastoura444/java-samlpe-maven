@@ -4,18 +4,18 @@ pipeline {
     stages {
         stage('Validate') {
             steps {
-                sh 'mvn validate'
-                sh 'mvn clean'
+                sh "mvn validate"
+                sh "mvn clean"
             }
         }
         stage('Build') {
             steps {
-                sh 'mvn compile'
+                sh "mvn compile"
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
+                sh "mvn test"
             }
         }
         post{
@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Package') {
             steps {
-                sh 'mvn package'
+                sh "mvn package"
             }
         }
         post{
